@@ -13,7 +13,10 @@ MegaCli="/usr/local/sbin/MegaCli64"
 # The identifying number of the enclosure. Default for our systems is "8". Use
 # "MegaCli64 -PDlist -a0 | grep "Enclosure Device"" to see what your number
 # is and set this variable.
-ENCLOSURE="8"
+
+# The script autodetects but you can override to save time.
+ENCLOSURE=`$MegaCli -PDlist -a0 | grep "Enclosure Device" | cut -d" " -f4 | tail -1`
+#ENCLOSURE="8"
 
 if [ $# -eq 0 ]
    then

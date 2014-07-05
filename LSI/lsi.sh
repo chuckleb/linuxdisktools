@@ -7,14 +7,36 @@
 #
 # description: MegaCLI script to configure and monitor LSI raid cards.
 
+# Check for root to run
+if [[ $EUID -ne 0 ]]; then
+	echo "This script must be run as root" 
+	echo "Ex. "sudo "$0"
+	exit 1
+fi
+
 # Full path to the MegaRaid CLI binary
-MegaCli="/usr/local/sbin/MegaCli64"
+# System detects if it is in path or else in common locations. 
+# Can be overridden by setting MegaCli manually
+
+if hash MegaCli 2>/dev/null; then
+        MegaCli="MegaCli64"
+	elif hash MegaCli64 2>/dev/null; then
+		MegaCli="MegaCli"
+	elif hash /opt/MegaRAID/MegaCli/MegaCli64 2>/dev/null; then
+		MegaCli="/opt/MegaRAID/MegaCli/MegaCli64"
+	elif hash /opt/MegaRAID/MegaCli/MegaCli 2>/dev/null; then
+		MegaCli="/opt/MegaRAID/MegaCli/MegaCli"
+	else
+		echo "MegaCli not found in path or standard locations"
+    fi
+#MegaCli="/usr/local/sbin/MegaCli64"
 
 # The identifying number of the enclosure. Default for our systems is "8". Use
 # "MegaCli64 -PDlist -a0 | grep "Enclosure Device"" to see what your number
 # is and set this variable.
 
 # The script autodetects but you can override to save time.
+
 ENCLOSURE=`$MegaCli -PDlist -a0 | grep "Enclosure Device" | cut -d" " -f4 | tail -1`
 #ENCLOSURE="8"
 

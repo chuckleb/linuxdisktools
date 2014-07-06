@@ -1,5 +1,7 @@
 #!/bin/bash
+# Charles Nguyen (chuckleb@gmail.com)
 #
+# Based off of :
 # Calomel.org 
 #     https://calomel.org/megacli_lsi_commands.html
 #     LSI MegaRaid CLI 

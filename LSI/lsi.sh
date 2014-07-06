@@ -54,6 +54,7 @@ if [ $# -eq 0 ]
     echo "replace \$slot = Replace \"Unconfigured(bad)\" drive (need slot number)"
     echo "progress      = Status of drive rebuild"
     echo "errors        = Show drive errors which are non-zero"
+    echo "mute          = Mute the alarm on the card"
     echo "bat           = Battery health and capacity"
     echo "batrelearn    = Force BBU re-learn cycle"
     echo "logs          = Print card logs"
@@ -264,3 +265,12 @@ if [ $1 = "setdefaults" ]
        rm -rf $OUTBBU
    exit
 fi
+
+
+# Used to mute the alarm on a card that is beeping.
+if [ $1 = "mute" ]
+   then
+      $MegaCli -AdpSetProp AlarmSilence -a0
+   exit
+fi
+

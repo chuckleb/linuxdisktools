@@ -1,7 +1,7 @@
 #!/bin/bash
 # Charles Nguyen (chuckleb@gmail.com)
 #
-# Based off of :
+# Based off of:
 # Calomel.org 
 #     https://calomel.org/megacli_lsi_commands.html
 #     LSI MegaRaid CLI 
@@ -20,9 +20,9 @@ fi
 # System detects if it is in path or else in common locations. 
 # Can be overridden by setting MegaCli manually
 
-if hash MegaCli 2>/dev/null; then
+if hash MegaCli64 2>/dev/null; then
         MegaCli="MegaCli64"
-	elif hash MegaCli64 2>/dev/null; then
+	elif hash MegaCli 2>/dev/null; then
 		MegaCli="MegaCli"
 	elif hash /opt/MegaRAID/MegaCli/MegaCli64 2>/dev/null; then
 		MegaCli="/opt/MegaRAID/MegaCli/MegaCli64"

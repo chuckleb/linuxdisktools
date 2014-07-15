@@ -58,6 +58,7 @@ if [ $# -eq 0 ]
     echo "bat           = Battery health and capacity"
     echo "batrelearn    = Force BBU re-learn cycle"
     echo "logs          = Print card logs"
+    echo "fulloutput    = Display full drive information"
     echo "checkNemail   = Check volume(s) and send email on raid errors"
     echo "allinfo       = Print out all settings and information about the card"
     echo "settime       = Set the raid card's time to the current system time"
@@ -270,7 +271,16 @@ fi
 # Used to mute the alarm on a card that is beeping.
 if [ $1 = "mute" ]
    then
-      $MegaCli -AdpSetProp AlarmSilence -a0
+      $MegaCli -AdpSetProp AlarmSilence -a0 -NoLog
    exit
 fi
+
+# Show full output of drive and enclosure
+if [ $1 = "fulloutput" ]
+   then
+      $MegaCli -PDlist -aALL -NoLog | egrep -i 'Enclosure Device|Slot|state|error|fail|slot' | awk '/Device/{if (x)print x;x="";}{x=(!x)?$0:x" -"$0;}END{print x;}' | awk '/Slot/{if (x)print x;x="";}{x=(!x)?$0:x" -"$0;}END{print x;}'
+fi
+
+
+
 

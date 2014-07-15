@@ -39,7 +39,7 @@ if hash MegaCli64 2>/dev/null; then
 
 # The script autodetects but you can override to save time.
 
-ENCLOSURE=`$MegaCli -PDlist -a0 | grep "Enclosure Device" | cut -d" " -f4 | tail -1`
+ENCLOSURE=`$MegaCli -PDlist -a0 -NoLog | grep "Enclosure Device" | cut -d" " -f4 | tail -1`
 #ENCLOSURE="8"
 
 if [ $# -eq 0 ]

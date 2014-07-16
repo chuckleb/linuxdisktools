@@ -49,7 +49,7 @@ if [ $# -eq 0 ]
     echo "bat                 = Battery health and capacity"
     echo "batrelearn          = Force BBU re-learn cycle"
     echo "logs                = Print card logs"
-    echo "fulloutput          = Display full drive information"
+    echo "fulldriveinfo       = Display full drive information"
     echo "checkNemail         = Check volume(s) and send email on raid errors"
     echo "allinfo             = Print out all settings and information about the card"
     echo "settime             = Set the raid card's time to the current system time"
@@ -108,7 +108,9 @@ fi
 # read/write retries or corrupt data. 
 if [ $1 = "errors" ]
    then
-      echo "Slot Number: 0"; $MegaCli -PDlist -aALL -NoLog | egrep -i 'error|fail|slot' | egrep -v '0'
+      $MegaCli -PDlist -aALL -NoLog | egrep -i 'error|fail|slot' | egrep -v 'Count: 0|Seq Number: 0' 
+# Future try to combine lines
+      #$MegaCli -PDlist -aALL -NoLog | egrep -i 'Enclosure device|error|fail|slot' | egrep -v 'Count: 0|Seq Number: 0' | paste -d " " - -
    exit
 fi
 

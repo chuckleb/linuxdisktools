@@ -1,13 +1,12 @@
 #!/bin/bash
-# Charles Nguyen (chuckleb@gmail.com)
-#
-# Based off of :
-# Calomel.org 
-#     https://calomel.org/megacli_lsi_commands.html
-#     LSI MegaRaid CLI 
-#     lsi.sh @ Version 0.05
+# 
+# Maintainer: Charles Nguyen (chuckleb@gmail.com)
+# Github page: https://github.com/chuckleb/linuxdisktools
 #
 # description: MegaCLI script to configure and monitor LSI raid cards.
+#
+# Please see changelog.txt for version notes
+version=0.5
 
 # Check for root to run
 if [[ $EUID -ne 0 ]]; then
@@ -20,9 +19,9 @@ fi
 # System detects if it is in path or else in common locations. 
 # Can be overridden by setting MegaCli manually
 
-if hash MegaCli 2>/dev/null; then
+if hash MegaCli64 2>/dev/null; then
         MegaCli="MegaCli64"
-	elif hash MegaCli64 2>/dev/null; then
+	elif hash MegaCli 2>/dev/null; then
 		MegaCli="MegaCli"
 	elif hash /opt/MegaRAID/MegaCli/MegaCli64 2>/dev/null; then
 		MegaCli="/opt/MegaRAID/MegaCli/MegaCli64"
@@ -33,35 +32,27 @@ if hash MegaCli 2>/dev/null; then
     fi
 #MegaCli="/usr/local/sbin/MegaCli64"
 
-# The identifying number of the enclosure. Default for our systems is "8". Use
-# "MegaCli64 -PDlist -a0 | grep "Enclosure Device"" to see what your number
-# is and set this variable.
-
-# The script autodetects but you can override to save time.
-
-ENCLOSURE=`$MegaCli -PDlist -a0 | grep "Enclosure Device" | cut -d" " -f4 | tail -1`
-#ENCLOSURE="8"
-
 if [ $# -eq 0 ]
    then
     echo ""
     echo "            OBPG  .:.  lsi.sh $arg1 $arg2"
     echo "-----------------------------------------------------"
-    echo "status        = Status of Virtual drives (volumes)"
-    echo "drives        = Status of hard drives"
-    echo "ident \$slot   = Blink light on drive (need slot number)"
-    echo "good \$slot    = Simply makes the slot \"Unconfigured(good)\" (need slot number)"
-    echo "replace \$slot = Replace \"Unconfigured(bad)\" drive (need slot number)"
-    echo "progress      = Status of drive rebuild"
-    echo "errors        = Show drive errors which are non-zero"
-    echo "mute          = Mute the alarm on the card"
-    echo "bat           = Battery health and capacity"
-    echo "batrelearn    = Force BBU re-learn cycle"
-    echo "logs          = Print card logs"
-    echo "checkNemail   = Check volume(s) and send email on raid errors"
-    echo "allinfo       = Print out all settings and information about the card"
-    echo "settime       = Set the raid card's time to the current system time"
-    echo "setdefaults   = Set preferred default settings for new raid setup"
+    echo "status              = Status of Virtual drives (volumes)"
+    echo "drives              = Status of hard drives"
+    echo "ident \$enc \$slot    = Blink light on drive (need enc + slot number)"
+    echo "good \$enc \$slot     = Simply makes the slot \"Unconfigured(good)\" (need enc + slot number)"
+    echo "replace \$enc \$slot  = Replace \"Unconfigured(bad)\" drive (need enc + slot number)"
+    echo "progress            = Status of drive rebuild"
+    echo "errors              = Show drive errors which are non-zero"
+    echo "mute                = Mute the alarm on the card"
+    echo "bat                 = Battery health and capacity"
+    echo "batrelearn          = Force BBU re-learn cycle"
+    echo "logs                = Print card logs"
+    echo "fulldriveinfo       = Display full drive information"
+    echo "checkNemail         = Check volume(s) and send email on raid errors"
+    echo "allinfo             = Print out all settings and information about the card"
+    echo "settime             = Set the raid card's time to the current system time"
+    echo "setdefaults         = Set preferred default settings for new raid setup"
     echo ""
    exit
  fi
@@ -88,10 +79,10 @@ fi
 # Use to blink the light on the slot in question. Hit enter again to turn the blinking light off.
 if [ $1 = "ident" ]
    then
-      $MegaCli  -PdLocate -start -physdrv[$ENCLOSURE:$2] -a0 -NoLog
-      logger "`hostname` - identifying enclosure $ENCLOSURE, drive $2 "
+      $MegaCli  -PdLocate -start -physdrv[$2:$3] -a0 -NoLog
+      logger "`hostname` - identifying enclosure $2, drive $3 "
       read -p "Press [Enter] key to turn off light..."
-      $MegaCli  -PdLocate -stop -physdrv[$ENCLOSURE:$2] -a0 -NoLog
+      $MegaCli  -PdLocate -stop -physdrv[$2:$3] -a0 -NoLog
    exit
 fi
 
@@ -103,7 +94,7 @@ fi
 if [ $1 = "good" ]
    then
       # set Unconfigured(bad) to Unconfigured(good)
-      $MegaCli -PDMakeGood -PhysDrv[$ENCLOSURE:$2] -a0 -NoLog
+      $MegaCli -PDMakeGood -PhysDrv[$2:$3] -a0 -NoLog
       # clear 'Foreign' flag or invalid raid header on replacement drive
       $MegaCli -CfgForeign -Clear -aALL -NoLog
    exit
@@ -116,7 +107,9 @@ fi
 # read/write retries or corrupt data. 
 if [ $1 = "errors" ]
    then
-      echo "Slot Number: 0"; $MegaCli -PDlist -aALL -NoLog | egrep -i 'error|fail|slot' | egrep -v '0'
+      $MegaCli -PDlist -aALL -NoLog | egrep -i 'error|fail|slot' | egrep -v 'Count: 0|Seq Number: 0' 
+# Future try to combine lines
+      #$MegaCli -PDlist -aALL -NoLog | egrep -i 'Enclosure device|error|fail|slot' | egrep -v 'Count: 0|Seq Number: 0' | paste -d " " - -
    exit
 fi
 
@@ -157,15 +150,15 @@ fi
 # destroy the raid drive, thankfully.
 if [ $1 = "replace" ]
    then
-      logger "`hostname` - REPLACE enclosure $ENCLOSURE, drive $2 "
+      logger "`hostname` - REPLACE enclosure $2, drive $3 "
       # set Unconfigured(bad) to Unconfigured(good)
-      $MegaCli -PDMakeGood -PhysDrv[$ENCLOSURE:$2] -a0 -NoLog
+      $MegaCli -PDMakeGood -PhysDrv[$2:$3] -a0 -NoLog
       # clear 'Foreign' flag or invalid raid header on replacement drive
       $MegaCli -CfgForeign -Clear -aALL -NoLog
       # set drive as hot spare
-      $MegaCli -PDHSP -Set -PhysDrv [$ENCLOSURE:$2] -a0 -NoLog
+      $MegaCli -PDHSP -Set -PhysDrv [$2:$3] -a0 -NoLog
       # show rebuild progress on replacement drive just to make sure it starts
-      $MegaCli -PDRbld -ShowProg -PhysDrv [$ENCLOSURE:$2] -a0 -NoLog
+      $MegaCli -PDRbld -ShowProg -PhysDrv [$2:$3] -a0 -NoLog
    exit
 fi
 
@@ -183,7 +176,7 @@ fi
 if [ $1 = "progress" ]
    then
       DRIVE=`$MegaCli -PDlist -aALL -NoLog | egrep 'Slot|state' | awk '/Slot/{if (x)print x;x="";}{x=(!x)?$0:x" -"$0;}END{print x;}' | sed 's/Firmware state://g' | egrep build | awk '{print $3}'`
-      $MegaCli -PDRbld -ShowProg -PhysDrv [$ENCLOSURE:$DRIVE] -a0 -NoLog
+      $MegaCli -PDRbld -ShowProg -PhysDrv [$2:$DRIVE] -a0 -NoLog
    exit
 fi
 
@@ -270,7 +263,16 @@ fi
 # Used to mute the alarm on a card that is beeping.
 if [ $1 = "mute" ]
    then
-      $MegaCli -AdpSetProp AlarmSilence -a0
+      $MegaCli -AdpSetProp AlarmSilence -a0 -NoLog
    exit
 fi
+
+# Show full output of drive and enclosure
+if [ $1 = "fulloutput" ]
+   then
+      $MegaCli -PDlist -aALL -NoLog | egrep -i 'Enclosure Device|Slot|state|error|fail|slot' | awk '/Device/{if (x)print x;x="";}{x=(!x)?$0:x" -"$0;}END{print x;}' | awk '/Slot/{if (x)print x;x="";}{x=(!x)?$0:x" -"$0;}END{print x;}'
+fi
+
+
+
 

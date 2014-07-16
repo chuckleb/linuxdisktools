@@ -1,0 +1,36 @@
+lsitools.sh changelog
+
+---
+2014/07/16
+v0.5			
+
+NEW
+-	Added fulldriveinfo function to useful details about drive. May be removed in future version.
+	https://github.com/chuckleb/linuxdisktools/commit/a58c29c50688442334336198c0311efb7f027715
+-	Removed static enclosure definition and forced all enclosure-related commands to use commandline option. 
+	Needed for systems with multiple expanders.
+	https://github.com/chuckleb/linuxdisktools/commit/e215613ccd91d482d62de9997a2e696f06c756df 
+-	Added mute function to mute the RAID card
+-	Added root detect to run
+-	Added dyamic detection of MegaCli* commands.
+-	Renamed tool to lsitools.sh
+
+BUGFIX
+-	Accidently created MegaSAS.log files, fixed. 
+	https://github.com/chuckleb/linuxdisktools/issues/5
+
+REMOVED
+
+BUG
+-	Progress function no longer works due to removing static $ENCLOSURE variable.
+	https://github.com/chuckleb/linuxdisktools/issues/6
+
+
+---
+
+Initial		
+Based off of:
+Calomel.org 
+https://calomel.org/megacli_lsi_commands.html
+LSI MegaRaid CLI 
+lsi.sh @ Version 0.05

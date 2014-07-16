@@ -1,13 +1,12 @@
 #!/bin/bash
-# Charles Nguyen (chuckleb@gmail.com)
-#
-# Based off of:
-# Calomel.org 
-#     https://calomel.org/megacli_lsi_commands.html
-#     LSI MegaRaid CLI 
-#     lsi.sh @ Version 0.05
+# 
+# Maintainer: Charles Nguyen (chuckleb@gmail.com)
+# Github page: https://github.com/chuckleb/linuxdisktools
 #
 # description: MegaCLI script to configure and monitor LSI raid cards.
+#
+# Please see changelog.txt for version notes
+version=0.5
 
 # Check for root to run
 if [[ $EUID -ne 0 ]]; then

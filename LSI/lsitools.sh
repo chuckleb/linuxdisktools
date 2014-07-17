@@ -30,6 +30,7 @@ if hash MegaCli64 2>/dev/null; then
 	else
 		echo "MegaCli not found in path or standard locations"
     fi
+
 #MegaCli="/usr/local/sbin/MegaCli64"
 
 if [ $# -eq 0 ]
@@ -268,7 +269,7 @@ if [ $1 = "mute" ]
 fi
 
 # Show full output of drive and enclosure
-if [ $1 = "fulloutput" ]
+if [ $1 = "fulldriveinfo" ]
    then
       $MegaCli -PDlist -aALL -NoLog | egrep -i 'Enclosure Device|Slot|state|error|fail|slot' | awk '/Device/{if (x)print x;x="";}{x=(!x)?$0:x" -"$0;}END{print x;}' | awk '/Slot/{if (x)print x;x="";}{x=(!x)?$0:x" -"$0;}END{print x;}'
 fi
